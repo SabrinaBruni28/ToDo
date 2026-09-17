@@ -1,4 +1,3 @@
-```yaml
 name: Build Flutter
 
 on:
@@ -326,4 +325,4 @@ jobs:
             release/MeuApp-Web.zip
             release/MeuApp-Linux.AppImage
             release/MeuApp-Setup.exe
-```
+

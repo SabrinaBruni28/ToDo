@@ -115,6 +115,10 @@ jobs:
       - name: Build Linux
         run: flutter build linux --release
 
+      # ------------------------------------------
+      # APPIMAGE
+      # ------------------------------------------
+
       - name: Install AppImage tool
         run: |
           wget -q \
@@ -122,6 +126,16 @@ jobs:
             -O appimagetool
 
           chmod +x appimagetool
+
+      - name: Create clean AppImage structure
+        run: |
+          rm -rf AppDir
+
+          mkdir -p AppDir/usr/bin
+
+          cp -r \
+            build/linux/x64/release/bundle/* \
+            AppDir/usr/bin/
 
       - name: Find Linux executable
         id: executable
@@ -141,23 +155,17 @@ jobs:
 
           EXECUTABLE_NAME=$(basename "$EXECUTABLE")
 
-          echo "Executável: $EXECUTABLE_NAME"
+          echo "Executável encontrado: $EXECUTABLE_NAME"
 
           echo "name=$EXECUTABLE_NAME" >> "$GITHUB_OUTPUT"
-
-      - name: Create AppImage structure
-        run: |
-          mkdir -p AppDir/usr/bin
-
-          cp -r \
-            build/linux/x64/release/bundle/* \
-            AppDir/usr/bin/
 
       - name: Create AppRun
         run: |
           cat > AppDir/AppRun << EOF
           #!/bin/sh
+
           HERE="\$(dirname "\$(readlink -f "\$0")")"
+
           exec "\$HERE/usr/bin/${{ steps.executable.outputs.name }}" "\$@"
           EOF
 
@@ -172,6 +180,19 @@ jobs:
           Type=Application
           Categories=Utility;
           EOF
+
+      - name: Verify AppImage structure
+        run: |
+          echo "===== APPDIR ====="
+          find AppDir -maxdepth 3 -type f -print
+
+          echo ""
+          echo "===== DESKTOP FILE ====="
+          cat AppDir/MeuApp.desktop
+
+          echo ""
+          echo "===== ICON ENTRIES ====="
+          grep -R "^[[:space:]]*Icon=" AppDir || true
 
       - name: Create AppImage
         run: |

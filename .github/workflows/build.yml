@@ -1,3 +1,4 @@
+```yaml
 name: Build Flutter
 
 on:
@@ -7,7 +8,14 @@ on:
 
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
+
+  # ==========================================
+  # ANDROID
+  # ==========================================
 
   android:
     runs-on: ubuntu-latest
@@ -28,12 +36,21 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
+      - name: Rename APK
+        run: |
+          mv build/app/outputs/flutter-apk/app-release.apk \
+             build/app/outputs/flutter-apk/MeuApp.apk
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: android
+          path: build/app/outputs/flutter-apk/MeuApp.apk
 
+
+  # ==========================================
+  # WEB
+  # ==========================================
 
   web:
     runs-on: ubuntu-latest
@@ -54,12 +71,21 @@ jobs:
       - name: Build Web
         run: flutter build web --release
 
+      - name: Create Web ZIP
+        run: |
+          cd build
+          zip -r MeuApp-Web.zip web
+
       - name: Upload Web
         uses: actions/upload-artifact@v4
         with:
           name: web
-          path: build/web
+          path: build/MeuApp-Web.zip
 
+
+  # ==========================================
+  # LINUX
+  # ==========================================
 
   linux:
     runs-on: ubuntu-latest
@@ -77,7 +103,9 @@ jobs:
             ninja-build \
             pkg-config \
             libgtk-3-dev \
-            libstdc++-12-dev
+            libstdc++-12-dev \
+            fuse3 \
+            libfuse2
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -91,12 +119,80 @@ jobs:
       - name: Build Linux
         run: flutter build linux --release
 
-      - name: Upload Linux
+      - name: Install AppImage tool
+        run: |
+          wget -q \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage \
+            -O appimagetool
+
+          chmod +x appimagetool
+
+      - name: Find Linux executable
+        id: executable
+        shell: bash
+        run: |
+          EXECUTABLE=$(find \
+            build/linux/x64/release/bundle \
+            -maxdepth 1 \
+            -type f \
+            -executable \
+            | head -n 1)
+
+          if [ -z "$EXECUTABLE" ]; then
+            echo "Executável Linux não encontrado."
+            exit 1
+          fi
+
+          EXECUTABLE_NAME=$(basename "$EXECUTABLE")
+
+          echo "Executável: $EXECUTABLE_NAME"
+
+          echo "name=$EXECUTABLE_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Create AppImage structure
+        run: |
+          mkdir -p AppDir/usr/bin
+
+          cp -r \
+            build/linux/x64/release/bundle/* \
+            AppDir/usr/bin/
+
+      - name: Create AppRun
+        run: |
+          cat > AppDir/AppRun << EOF
+          #!/bin/sh
+          HERE="\$(dirname "\$(readlink -f "\$0")")"
+          exec "\$HERE/usr/bin/${{ steps.executable.outputs.name }}" "\$@"
+          EOF
+
+          chmod +x AppDir/AppRun
+
+      - name: Create desktop file
+        run: |
+          cat > AppDir/MeuApp.desktop << EOF
+          [Desktop Entry]
+          Name=MeuApp
+          Exec=${{ steps.executable.outputs.name }}
+          Type=Application
+          Categories=Utility;
+          EOF
+
+      - name: Create AppImage
+        run: |
+          ./appimagetool \
+            AppDir \
+            MeuApp-Linux.AppImage
+
+      - name: Upload AppImage
         uses: actions/upload-artifact@v4
         with:
           name: linux
-          path: build/linux/x64/release/bundle
+          path: MeuApp-Linux.AppImage
 
+
+  # ==========================================
+  # WINDOWS
+  # ==========================================
 
   windows:
     runs-on: windows-latest
@@ -117,8 +213,117 @@ jobs:
       - name: Build Windows
         run: flutter build windows --release
 
-      - name: Upload Windows
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup -y
+
+      - name: Find Windows executable
+        shell: powershell
+        run: |
+          $exe = Get-ChildItem `
+            "build/windows/x64/runner/Release" `
+            -Filter "*.exe" |
+            Where-Object { $_.Name -ne "unins000.exe" } |
+            Select-Object -First 1
+
+          if (-not $exe) {
+            Write-Error "Executável Windows não encontrado."
+            exit 1
+          }
+
+          echo "WINDOWS_EXE=$($exe.Name)" >> $env:GITHUB_ENV
+
+      - name: Create Installer Script
+        shell: powershell
+        run: |
+          @"
+          [Setup]
+          AppName=MeuApp
+          AppVersion=1.0.0
+          DefaultDirName={autopf}\MeuApp
+          DefaultGroupName=MeuApp
+
+          OutputDir=installer
+          OutputBaseFilename=MeuApp-Setup
+
+          Compression=lzma
+          SolidCompression=yes
+
+          ArchitecturesInstallIn64BitMode=x64
+
+          [Files]
+          Source: "build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
+
+          [Icons]
+          Name: "{group}\MeuApp"; Filename: "{app}\$env:WINDOWS_EXE"
+          Name: "{autodesktop}\MeuApp"; Filename: "{app}\$env:WINDOWS_EXE"
+
+          [Run]
+          Filename: "{app}\$env:WINDOWS_EXE"; Description: "Executar MeuApp"; Flags: nowait postinstall skipifsilent
+          "@ | Out-File -Encoding UTF8 installer.iss
+
+      - name: Build Windows Installer
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force installer
+
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Upload Windows Installer
         uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: build/windows/x64/runner/Release
+          path: installer/MeuApp-Setup.exe
+
+
+  # ==========================================
+  # RELEASE
+  # ==========================================
+
+  release:
+    runs-on: ubuntu-latest
+
+    needs:
+      - android
+      - web
+      - linux
+      - windows
+
+    steps:
+
+      - name: Download Android
+        uses: actions/download-artifact@v4
+        with:
+          name: android
+          path: release
+
+      - name: Download Web
+        uses: actions/download-artifact@v4
+        with:
+          name: web
+          path: release
+
+      - name: Download Linux
+        uses: actions/download-artifact@v4
+        with:
+          name: linux
+          path: release
+
+      - name: Download Windows
+        uses: actions/download-artifact@v4
+        with:
+          name: windows
+          path: release
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: MeuApp v1.0.${{ github.run_number }}
+          generate_release_notes: true
+          files: |
+            release/MeuApp.apk
+            release/MeuApp-Web.zip
+            release/MeuApp-Linux.AppImage
+            release/MeuApp-Setup.exe
+```

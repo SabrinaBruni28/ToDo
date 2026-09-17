@@ -11,7 +11,6 @@ permissions:
   contents: write
 
 jobs:
-
   # ==========================================
   # ANDROID
   # ==========================================
@@ -46,7 +45,6 @@ jobs:
           name: android
           path: build/app/outputs/flutter-apk/MeuApp.apk
 
-
   # ==========================================
   # WEB
   # ==========================================
@@ -80,7 +78,6 @@ jobs:
         with:
           name: web
           path: build/MeuApp-Web.zip
-
 
   # ==========================================
   # LINUX
@@ -188,7 +185,6 @@ jobs:
           name: linux
           path: MeuApp-Linux.AppImage
 
-
   # ==========================================
   # WINDOWS
   # ==========================================
@@ -274,7 +270,6 @@ jobs:
           name: windows
           path: installer/MeuApp-Setup.exe
 
-
   # ==========================================
   # RELEASE
   # ==========================================
@@ -289,7 +284,6 @@ jobs:
       - windows
 
     steps:
-
       - name: Download Android
         uses: actions/download-artifact@v4
         with:
@@ -325,4 +319,3 @@ jobs:
             release/MeuApp-Web.zip
             release/MeuApp-Linux.AppImage
             release/MeuApp-Setup.exe
-

@@ -1,11 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:todo/models/item.dart';
 
-class AddPage extends StatelessWidget {
+class EditPage extends StatefulWidget {
+  const EditPage({super.key});
+
+  @override
+  State<EditPage> createState() => _EditPageState();
+}
+
+class _EditPageState extends State<EditPage> {
   final newTaskCtrl = TextEditingController();
   final descriptionCtrl = TextEditingController();
 
-  AddPage({super.key});
+  late Item item;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    item = ModalRoute.of(context)!.settings.arguments as Item;
+
+    newTaskCtrl.text = item.title;
+    descriptionCtrl.text = item.descricao;
+  }
+
+  @override
+  void dispose() {
+    newTaskCtrl.dispose();
+    descriptionCtrl.dispose();
+    super.dispose();
+  }
+
+  void save() {
+    if (newTaskCtrl.text.trim().isEmpty) return;
+
+    item.title = newTaskCtrl.text.trim();
+    item.descricao = descriptionCtrl.text.trim();
+
+    Navigator.pop(context, item);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +47,7 @@ class AddPage extends StatelessWidget {
 
       appBar: AppBar(
         title: const Text(
-          "Nova Tarefa",
+          "Editar Tarefa",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -28,7 +61,6 @@ class AddPage extends StatelessWidget {
           width: 400,
           padding: const EdgeInsets.all(28),
 
-          // Caixa da tela
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -46,9 +78,8 @@ class AddPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
 
             children: [
-              // Titulo
               const Text(
-                "Adicionar tarefa",
+                "Editar tarefa",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -56,17 +87,9 @@ class AddPage extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 8),
-
-              // Descrição
-              Text(
-                "Digite os dados da nova tarefa",
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-              ),
-
               const SizedBox(height: 24),
 
-              // Entrada do Título da tarefa
+              // Título
               TextFormField(
                 controller: newTaskCtrl,
                 keyboardType: TextInputType.text,
@@ -97,7 +120,7 @@ class AddPage extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Entrada da Descrição da tarefa
+              // Descrição
               TextFormField(
                 controller: descriptionCtrl,
                 keyboardType: TextInputType.multiline,
@@ -134,31 +157,18 @@ class AddPage extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // Botão de confirmação
+              // Botão
               SizedBox(
                 width: double.infinity,
                 height: 50,
 
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    if (newTaskCtrl.text.trim().isEmpty) return;
+                  onPressed: save,
 
-                    final item = Item(
-                      title: newTaskCtrl.text.trim(),
-                      descricao: descriptionCtrl.text.trim(),
-                      done: false,
-                    );
-
-                    newTaskCtrl.clear();
-                    descriptionCtrl.clear();
-
-                    Navigator.pop(context, item);
-                  },
-
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(Icons.save),
 
                   label: const Text(
-                    "Adicionar tarefa",
+                    "Salvar alterações",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
 

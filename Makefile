@@ -35,3 +35,6 @@ web:
 linux:
 	flutter build linux --release
 
+# Gera icones para cada tipo de plataforma
+icones:
+	dart run flutter_launcher_icons

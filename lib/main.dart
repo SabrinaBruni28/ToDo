@@ -1,6 +1,8 @@
 import 'package:todo/pages/add_page.dart';
+import 'package:todo/pages/edit_page.dart';
 import 'package:todo/pages/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:todo/pages/view_page.dart';
 
 void main() {
   runApp(
@@ -12,7 +14,11 @@ void main() {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
       ),
       home: HomePage(),
-      routes: {"/add": (context) => AddPage()},
+      routes: {
+        "/add": (context) => AddPage(),
+        "/edit": (context) => EditPage(),
+        "/view": (context) => ViewPage(),
+      },
     ),
   );
 }

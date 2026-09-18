@@ -136,38 +136,46 @@ class _HomePageState extends State<HomePage> {
             borderRadius: BorderRadius.circular(16),
           ),
 
-          child: CheckboxListTile(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 6,
-            ),
-
-            activeColor: Colors.purple,
-
+          child: ListTile(
             title: Text(
               item.title,
-
               style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w500,
-
+                fontWeight: FontWeight.bold,
                 decoration: item.done
                     ? TextDecoration.lineThrough
                     : TextDecoration.none,
-
-                color: item.done ? Colors.grey : Colors.black87,
               ),
             ),
 
-            value: item.done,
+            onTap: () async {
+              final result = await Navigator.of(context)
+                  .pushNamed("/view", arguments: item);
 
-            onChanged: (value) {
-              setState(() {
-                item.done = value ?? false;
-              });
+              if (result is Item) {
+                setState(() {
+                  items[index] = result;
+                });
 
-              save();
+                save();
+              }
             },
+
+            trailing: Transform.scale(
+              scale: 1.7,
+              child: Checkbox(
+                value: item.done,
+                onChanged: (value) {
+                  setState(() {
+                    item.done = value ?? false;
+                  });
+
+                  save();
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
           ),
         ),
       ),

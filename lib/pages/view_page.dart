@@ -1,3 +1,6 @@
+import 'package:todo/widgets/page_container.dart';
+import 'package:todo/widgets/primary_button.dart';
+import 'package:todo/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:todo/models/task.dart';
 
@@ -35,161 +38,104 @@ class _ViewPageState extends State<ViewPage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
 
-      appBar: AppBar(
-        // Titulo
-        title: const Text(
-          "Visualizar Task",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-
-        // Configuração
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
-
-        // Seta de voltar
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context, task);
-          },
-        ),
+      appBar: AppBarToDo(
+        title: "Visualizar Task",
+        onBack: () {
+          Navigator.pop(context, task);
+        },
       ),
 
-      body: Center(
-        child: Container(
-          width: 400,
-          padding: const EdgeInsets.all(28),
+      body: PageContainer(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
 
-          // Caixa
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+          children: [
+            // Titulo
+            const Center(
+              child: Text(
+                "Detalhes da task",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-            ],
-          ),
+            ),
 
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 28),
 
-            children: [
-              // Titulo
-              const Center(
-                child: Text(
-                  "Detalhes da task",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            // Titulo da tarefa
+            const Text(
+              "Tarefa",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.purple,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            // Titulo em si
+            Text(
+              task.title,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Descrição da tarefa
+            const Text(
+              "Descrição",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.purple,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            // Descrição em si
+            Text(
+              task.description.isEmpty
+                  ? "Nenhuma descrição informada."
+                  : task.description,
+              style: const TextStyle(fontSize: 16),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Status da tarefa
+            const Text(
+              "Status",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.purple,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            // Status em si
+            Row(
+              children: [
+                Icon(
+                  task.done ? Icons.check_circle : Icons.radio_button_unchecked,
+                  color: task.done ? Colors.green : Colors.grey,
                 ),
-              ),
-
-              const SizedBox(height: 28),
-
-              // Titulo da tarefa
-              const Text(
-                "Tarefa",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purple,
+                const SizedBox(width: 8),
+                Text(
+                  task.done ? "Concluída" : "Pendente",
+                  style: const TextStyle(fontSize: 16),
                 ),
-              ),
+              ],
+            ),
 
-              const SizedBox(height: 6),
+            const SizedBox(height: 30),
 
-              // Titulo em si
-              Text(
-                task.title,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Descrição da tarefa
-              const Text(
-                "Descrição",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purple,
-                ),
-              ),
-
-              const SizedBox(height: 6),
-
-              // Descrição em si
-              Text(
-                task.description.isEmpty
-                    ? "Nenhuma descrição informada."
-                    : task.description,
-                style: const TextStyle(fontSize: 16),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Status da tarefa
-              const Text(
-                "Status",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purple,
-                ),
-              ),
-
-              const SizedBox(height: 6),
-
-              // Status em si
-              Row(
-                children: [
-                  Icon(
-                    task.done
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
-                    color: task.done ? Colors.green : Colors.grey,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    task.done ? "Concluída" : "Pendente",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 30),
-
-              // Botão de Editar
-              SizedBox(
-                height: 50,
-                width: double.infinity,
-
-                child: ElevatedButton.icon(
-                  onPressed: edit,
-                  icon: const Icon(Icons.edit),
-
-                  label: const Text(
-                    "Editar task",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-
-                  // Estilo do botão
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    foregroundColor: Colors.white,
-
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            // Botão de Editar
+            PrimaryButton(
+              text: "Editar task",
+              icon: Icons.edit,
+              onPressed: edit,
+            ),
+          ],
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todo/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:todo/models/task.dart';
 
@@ -71,19 +72,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
 
-      appBar: AppBar(
-        // Titulo
-        title: const Text(
-          "To Do List",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-
-        // Configuração
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
-      ),
+      appBar: const AppBarToDo(title: "To Do"),
 
       body: tasks.isEmpty
           ? _buildEmptyState()

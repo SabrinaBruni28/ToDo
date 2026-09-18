@@ -1,29 +1,29 @@
-// Claase que representa uma tarefa
 class Task {
+  int id;
   String title;
   String description;
   bool done;
 
   // Construtor
-  Task({this.title = "", this.done = false, this.description = ""});
+  Task({
+    this.id = 0,
+    this.title = "",
+    this.description = "",
+    this.done = false,
+  });
 
-  // Transforma um json na classe
+  // Transforma um JSON na classe
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
+      id: json['id'],
       title: json['title'],
-      done: json['done'],
       description: json['description'],
+      done: json['done'],
     );
   }
 
-  // Transforma a classe em um json
+  // Transforma a classe em um JSON
   Map<String, dynamic> toJson() {
-    final mapString = <String, dynamic>{};
-
-    mapString['title'] = title;
-    mapString['done'] = done;
-    mapString['description'] = description;
-
-    return mapString;
+    return {'id': id, 'title': title, 'description': description, 'done': done};
   }
 }

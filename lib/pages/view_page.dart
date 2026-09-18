@@ -1,5 +1,6 @@
 import 'package:todo/widgets/page_container.dart';
 import 'package:todo/widgets/primary_button.dart';
+import 'package:todo/services/task_storage.dart';
 import 'package:todo/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:todo/models/task.dart';
@@ -30,6 +31,15 @@ class _ViewPageState extends State<ViewPage> {
       setState(() {
         task = result;
       });
+
+      final tasks = await TaskStorage.load();
+
+      final index = tasks.indexWhere((item) => item.id == task.id);
+
+      if (index != -1) {
+        tasks[index] = task;
+        await TaskStorage.save(tasks);
+      }
     }
   }
 

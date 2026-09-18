@@ -1,9 +1,7 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todo/services/task_storage.dart';
 import 'package:todo/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:todo/models/task.dart';
-
-import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,10 +24,12 @@ class _HomePageState extends State<HomePage> {
   void add() async {
     final task = await Navigator.of(context).pushNamed("/add");
 
-    if (task == null) return;
+    if (task is! Task) return;
+
+    task.id = TaskStorage.generateId(tasks);
 
     setState(() {
-      tasks.add(task as Task);
+      tasks.add(task);
     });
 
     save();
@@ -46,25 +46,16 @@ class _HomePageState extends State<HomePage> {
 
   // Carrega a lista de um json de save
   Future load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getString('data');
+    final result = await TaskStorage.load();
 
-    if (data != null) {
-      final Iterable decoded = jsonDecode(data);
-
-      final List<Task> result = decoded.map((x) => Task.fromJson(x)).toList();
-
-      setState(() {
-        tasks = result;
-      });
-    }
+    setState(() {
+      tasks = result;
+    });
   }
 
   // Salva a lista em um json de save
   Future save() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    await prefs.setString('data', jsonEncode(tasks));
+    await TaskStorage.save(tasks);
   }
 
   @override

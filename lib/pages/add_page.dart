@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo/models/item.dart';
+import 'package:todo/models/task.dart';
 
 class AddPage extends StatelessWidget {
   final newTaskCtrl = TextEditingController();
@@ -13,14 +13,17 @@ class AddPage extends StatelessWidget {
       backgroundColor: Colors.grey[100],
 
       appBar: AppBar(
+        // Titulo
         title: const Text(
-          "Nova Tarefa",
+          "Nova Task",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
+
+        // Configuração
         elevation: 0,
+        centerTitle: true,
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.purple,
       ),
 
       body: Center(
@@ -28,7 +31,7 @@ class AddPage extends StatelessWidget {
           width: 400,
           padding: const EdgeInsets.all(28),
 
-          // Caixa da tela
+          // Caixa
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -48,7 +51,7 @@ class AddPage extends StatelessWidget {
             children: [
               // Titulo
               const Text(
-                "Adicionar tarefa",
+                "Adicionar task",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -60,36 +63,36 @@ class AddPage extends StatelessWidget {
 
               // Descrição
               Text(
-                "Digite os dados da nova tarefa",
+                "Digite os dados da nova task",
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
 
               const SizedBox(height: 24),
 
-              // Entrada do Título da tarefa
+              // Entrada do Título da task
               TextFormField(
                 controller: newTaskCtrl,
                 keyboardType: TextInputType.text,
 
                 decoration: InputDecoration(
-                  labelText: "Tarefa",
+                  labelText: "Task",
                   hintText: "Ex.: Estudar Flutter",
-
-                  prefixIcon: const Icon(Icons.edit, color: Colors.purple),
 
                   filled: true,
                   fillColor: Colors.grey[100],
 
+                  prefixIcon: const Icon(Icons.edit, color: Colors.purple),
+
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(12),
                   ),
 
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(
-                      color: Colors.purple,
                       width: 2,
+                      color: Colors.purple,
                     ),
                   ),
                 ),
@@ -97,36 +100,35 @@ class AddPage extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Entrada da Descrição da tarefa
+              // Entrada da Descrição da task
               TextFormField(
+                maxLines: 4,
                 controller: descriptionCtrl,
                 keyboardType: TextInputType.multiline,
-                maxLines: 4,
 
                 decoration: InputDecoration(
                   labelText: "Descrição",
                   hintText: "Ex.: Estudar widgets, layouts e navegação.",
 
+                  filled: true,
                   alignLabelWithHint: true,
+                  fillColor: Colors.grey[100],
 
                   prefixIcon: const Padding(
                     padding: EdgeInsets.only(bottom: 75),
                     child: Icon(Icons.description, color: Colors.purple),
                   ),
 
-                  filled: true,
-                  fillColor: Colors.grey[100],
-
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(12),
                   ),
 
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(
-                      color: Colors.purple,
                       width: 2,
+                      color: Colors.purple,
                     ),
                   ),
                 ),
@@ -136,41 +138,40 @@ class AddPage extends StatelessWidget {
 
               // Botão de confirmação
               SizedBox(
-                width: double.infinity,
                 height: 50,
+                width: double.infinity,
 
                 child: ElevatedButton.icon(
                   onPressed: () {
                     if (newTaskCtrl.text.trim().isEmpty) return;
 
-                    final item = Item(
+                    final task = Task(
                       title: newTaskCtrl.text.trim(),
-                      descricao: descriptionCtrl.text.trim(),
+                      description: descriptionCtrl.text.trim(),
                       done: false,
                     );
 
                     newTaskCtrl.clear();
                     descriptionCtrl.clear();
 
-                    Navigator.pop(context, item);
+                    Navigator.pop(context, task);
                   },
 
                   icon: const Icon(Icons.add),
 
                   label: const Text(
-                    "Adicionar tarefa",
+                    "Adicionar task",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
 
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
+                    elevation: 2,
                     foregroundColor: Colors.white,
+                    backgroundColor: Colors.purple,
 
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-
-                    elevation: 2,
                   ),
                 ),
               ),

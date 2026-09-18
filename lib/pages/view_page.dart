@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo/models/item.dart';
+import 'package:todo/models/task.dart';
 
 class ViewPage extends StatefulWidget {
   const ViewPage({super.key});
@@ -9,22 +9,23 @@ class ViewPage extends StatefulWidget {
 }
 
 class _ViewPageState extends State<ViewPage> {
-  late Item item;
+  late Task task;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    item = ModalRoute.of(context)!.settings.arguments as Item;
+    task = ModalRoute.of(context)!.settings.arguments as Task;
   }
 
+  // Muda para a tela de edição
   Future edit() async {
     final result = await Navigator.of(context)
-        .pushNamed("/edit", arguments: item);
+        .pushNamed("/edit", arguments: task);
 
-    if (result is Item) {
+    if (result is Task) {
       setState(() {
-        item = result;
+        task = result;
       });
     }
   }
@@ -35,18 +36,23 @@ class _ViewPageState extends State<ViewPage> {
       backgroundColor: Colors.grey[100],
 
       appBar: AppBar(
+        // Titulo
         title: const Text(
-          "Visualizar Tarefa",
+          "Visualizar Task",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+
+        // Configuração
+        elevation: 0,
         centerTitle: true,
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
-        elevation: 0,
+
+        // Seta de voltar
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context, item);
+            Navigator.pop(context, task);
           },
         ),
       ),
@@ -56,6 +62,7 @@ class _ViewPageState extends State<ViewPage> {
           width: 400,
           padding: const EdgeInsets.all(28),
 
+          // Caixa
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -73,15 +80,17 @@ class _ViewPageState extends State<ViewPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
 
             children: [
+              // Titulo
               const Center(
                 child: Text(
-                  "Detalhes da tarefa",
+                  "Detalhes da task",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ),
 
               const SizedBox(height: 28),
 
+              // Titulo da tarefa
               const Text(
                 "Tarefa",
                 style: TextStyle(
@@ -92,8 +101,9 @@ class _ViewPageState extends State<ViewPage> {
 
               const SizedBox(height: 6),
 
+              // Titulo em si
               Text(
-                item.title,
+                task.title,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -102,6 +112,7 @@ class _ViewPageState extends State<ViewPage> {
 
               const SizedBox(height: 24),
 
+              // Descrição da tarefa
               const Text(
                 "Descrição",
                 style: TextStyle(
@@ -112,15 +123,17 @@ class _ViewPageState extends State<ViewPage> {
 
               const SizedBox(height: 6),
 
+              // Descrição em si
               Text(
-                item.descricao.isEmpty
+                task.description.isEmpty
                     ? "Nenhuma descrição informada."
-                    : item.descricao,
+                    : task.description,
                 style: const TextStyle(fontSize: 16),
               ),
 
               const SizedBox(height: 24),
 
+              // Status da tarefa
               const Text(
                 "Status",
                 style: TextStyle(
@@ -131,17 +144,18 @@ class _ViewPageState extends State<ViewPage> {
 
               const SizedBox(height: 6),
 
+              // Status em si
               Row(
                 children: [
                   Icon(
-                    item.done
+                    task.done
                         ? Icons.check_circle
                         : Icons.radio_button_unchecked,
-                    color: item.done ? Colors.green : Colors.grey,
+                    color: task.done ? Colors.green : Colors.grey,
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    item.done ? "Concluída" : "Pendente",
+                    task.done ? "Concluída" : "Pendente",
                     style: const TextStyle(fontSize: 16),
                   ),
                 ],
@@ -149,19 +163,25 @@ class _ViewPageState extends State<ViewPage> {
 
               const SizedBox(height: 30),
 
+              // Botão de Editar
               SizedBox(
-                width: double.infinity,
                 height: 50,
+                width: double.infinity,
+
                 child: ElevatedButton.icon(
                   onPressed: edit,
                   icon: const Icon(Icons.edit),
+
                   label: const Text(
-                    "Editar tarefa",
+                    "Editar task",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
+
+                  // Estilo do botão
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple,
                     foregroundColor: Colors.white,
+
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

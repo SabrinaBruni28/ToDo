@@ -1,4 +1,4 @@
-package br.com.sabrinabruni.todo
+package br.com.sabrinabruni.ToDo
 
 import io.flutter.embedding.android.FlutterActivity
 

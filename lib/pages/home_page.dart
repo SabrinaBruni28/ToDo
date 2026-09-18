@@ -1,8 +1,8 @@
-import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'package:todo/models/item.dart';
+import 'package:todo/models/task.dart';
+
+import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,34 +12,38 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Item> items = [];
+  List<Task> tasks = [];
 
   @override
   void initState() {
     super.initState();
+    // Carrega a lista no inicio
     load();
   }
 
+  // Muda para a tela de adicionar tarefa
   void add() async {
-    final item = await Navigator.of(context).pushNamed("/add");
+    final task = await Navigator.of(context).pushNamed("/add");
 
-    if (item == null) return;
+    if (task == null) return;
 
     setState(() {
-      items.add(item as Item);
+      tasks.add(task as Task);
     });
 
     save();
   }
 
+  // Exclui uma tarefa
   void remove(int index) {
     setState(() {
-      items.removeAt(index);
+      tasks.removeAt(index);
     });
 
     save();
   }
 
+  // Carrega a lista de um json de save
   Future load() async {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString('data');
@@ -47,18 +51,19 @@ class _HomePageState extends State<HomePage> {
     if (data != null) {
       final Iterable decoded = jsonDecode(data);
 
-      final List<Item> result = decoded.map((x) => Item.fromJson(x)).toList();
+      final List<Task> result = decoded.map((x) => Task.fromJson(x)).toList();
 
       setState(() {
-        items = result;
+        tasks = result;
       });
     }
   }
 
+  // Salva a lista em um json de save
   Future save() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString('data', jsonEncode(items));
+    await prefs.setString('data', jsonEncode(tasks));
   }
 
   @override
@@ -67,31 +72,37 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.grey[100],
 
       appBar: AppBar(
+        // Titulo
         title: const Text(
           "To Do List",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+
+        // Configuração
+        elevation: 0,
         centerTitle: true,
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
-        elevation: 0,
       ),
 
-      body: items.isEmpty
+      body: tasks.isEmpty
           ? _buildEmptyState()
           : ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: items.length,
+              itemCount: tasks.length,
               itemBuilder: (context, index) {
                 return _buildTaskCard(index);
               },
             ),
 
+      // Botão de adicionar no canto da tela
       floatingActionButton: FloatingActionButton.extended(
         onPressed: add,
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
+
         icon: const Icon(Icons.add),
+
         label: const Text(
           "Adicionar",
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -101,29 +112,29 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildTaskCard(int index) {
-    final item = items[index];
+    final task = tasks[index];
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
 
       child: Dismissible(
-        key: ValueKey(item.title),
-
+        key: ValueKey(task.title),
         direction: DismissDirection.endToStart,
 
+        // Background
         background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+
           decoration: BoxDecoration(
             color: Colors.red,
             borderRadius: BorderRadius.circular(16),
           ),
 
-          alignment: Alignment.centerRight,
-
-          padding: const EdgeInsets.only(right: 20),
-
           child: const Icon(Icons.delete, color: Colors.white),
         ),
 
+        // Ação ao deslizar
         onDismissed: (direction) {
           remove(index);
         },
@@ -137,43 +148,51 @@ class _HomePageState extends State<HomePage> {
           ),
 
           child: ListTile(
+            // Titulo da tarefa
             title: Text(
-              item.title,
+              task.title,
+
+              // Estilo do texto
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                decoration: item.done
+                decoration: task.done
                     ? TextDecoration.lineThrough
                     : TextDecoration.none,
               ),
             ),
 
+            // Ação ao clicar
             onTap: () async {
               final result = await Navigator.of(context)
-                  .pushNamed("/view", arguments: item);
+                  .pushNamed("/view", arguments: task);
 
-              if (result is Item) {
+              if (result is Task) {
                 setState(() {
-                  items[index] = result;
+                  tasks[index] = result;
                 });
 
                 save();
               }
             },
 
+            // Icone de check
             trailing: Transform.scale(
               scale: 1.7,
               child: Checkbox(
-                value: item.done,
+                value: task.done,
+
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+
+                // Ação
                 onChanged: (value) {
                   setState(() {
-                    item.done = value ?? false;
+                    task.done = value ?? false;
                   });
 
                   save();
                 },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
               ),
             ),
           ),
@@ -182,6 +201,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Widget para tela sem tarefas
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
@@ -191,16 +211,20 @@ class _HomePageState extends State<HomePage> {
           mainAxisSize: MainAxisSize.min,
 
           children: [
+            // Icone
             Icon(
-              Icons.checklist,
               size: 80,
+              Icons.checklist,
               color: Colors.purple.withValues(alpha: 0.5),
             ),
 
             const SizedBox(height: 20),
 
+            // Texto principal
+            //? Porque não precisa de textalign
+            //? Porque é const
             const Text(
-              "Nenhuma tarefa",
+              "Nenhuma task",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -210,8 +234,9 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: 8),
 
+            // Texto explicativo
             Text(
-              "Adicione uma tarefa para começar.",
+              "Adicione uma task para começar.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),

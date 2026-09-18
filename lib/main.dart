@@ -1,7 +1,8 @@
-import 'package:todo/pages/edit_page.dart';
+import 'package:todo/pages/add_category_page.dart';
+import 'package:todo/pages/edit_task_page.dart';
+import 'package:todo/pages/view_task_page.dart';
+import 'package:todo/pages/add_task_page.dart';
 import 'package:todo/pages/home_page.dart';
-import 'package:todo/pages/view_page.dart';
-import 'package:todo/pages/add_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -24,9 +25,11 @@ void main() {
 
       // Rotas
       routes: {
-        "/add": (context) => AddPage(),
-        "/edit": (context) => EditPage(),
-        "/view": (context) => ViewPage(),
+        "/addTarefa": (context) => AddTaskPage(),
+        "/addCategoria": (context) => AddCategoryPage(),
+
+        "/editTarefa": (context) => EditTaskPage(),
+        "/viewTarefa": (context) => ViewTaskPage(),
       },
     ),
   );

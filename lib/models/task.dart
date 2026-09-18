@@ -3,6 +3,7 @@ class Task {
   String title;
   String description;
   bool done;
+  int categoryId;
 
   // Construtor
   Task({
@@ -10,6 +11,7 @@ class Task {
     this.title = "",
     this.description = "",
     this.done = false,
+    this.categoryId = 0,
   });
 
   // Transforma um JSON na classe
@@ -19,11 +21,18 @@ class Task {
       title: json['title'],
       description: json['description'],
       done: json['done'],
+      categoryId: json['categoryId'],
     );
   }
 
   // Transforma a classe em um JSON
   Map<String, dynamic> toJson() {
-    return {'id': id, 'title': title, 'description': description, 'done': done};
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'done': done,
+      'categoryId': categoryId,
+    };
   }
 }

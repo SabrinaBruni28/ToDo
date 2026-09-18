@@ -1,14 +1,14 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:todo/models/task.dart';
+import 'package:todo/models/category.dart';
 
 import 'dart:convert';
 import 'dart:math';
 
-class TaskStorage {
-  static const String _key = 'tasks';
+class CategoryStorage {
+  static const String _key = 'categories';
 
   // Gera um ID aleatório que ainda não existe
-  static int generateId(List<Task> tasks) {
+  static int generateId(List<Category> tasks) {
     final random = Random();
 
     int id;
@@ -21,7 +21,7 @@ class TaskStorage {
   }
 
   // Carrega as tarefas salvas
-  static Future<List<Task>> load() async {
+  static Future<List<Category>> load() async {
     final prefs = await SharedPreferences.getInstance();
 
     final data = prefs.getString(_key);
@@ -30,11 +30,11 @@ class TaskStorage {
 
     final List<dynamic> jsonList = jsonDecode(data);
 
-    return jsonList.map((item) => Task.fromJson(item)).toList();
+    return jsonList.map((item) => Category.fromJson(item)).toList();
   }
 
   // Salva todas as tarefas
-  static Future<void> save(List<Task> tasks) async {
+  static Future<void> save(List<Category> tasks) async {
     final prefs = await SharedPreferences.getInstance();
 
     final jsonList = tasks.map((task) => task.toJson()).toList();

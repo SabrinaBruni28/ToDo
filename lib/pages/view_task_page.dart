@@ -1,31 +1,67 @@
 import 'package:todo/widgets/page_container.dart';
 import 'package:todo/widgets/primary_button.dart';
 import 'package:todo/services/task_storage.dart';
+import 'package:todo/services/category_storage.dart';
 import 'package:todo/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:todo/models/task.dart';
+import 'package:todo/models/category.dart';
 
-class ViewPage extends StatefulWidget {
-  const ViewPage({super.key});
+class ViewTaskPage extends StatefulWidget {
+  const ViewTaskPage({super.key});
 
   @override
-  State<ViewPage> createState() => _ViewPageState();
+  State<ViewTaskPage> createState() => _ViewTaskPageState();
 }
 
-class _ViewPageState extends State<ViewPage> {
+class _ViewTaskPageState extends State<ViewTaskPage> {
   late Task task;
+
+  List<Category> categories = [];
+
+  bool initialized = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    if (initialized) return;
+
     task = ModalRoute.of(context)!.settings.arguments as Task;
+
+    initialized = true;
+
+    loadCategories();
+  }
+
+  // Carrega as categorias
+  Future<void> loadCategories() async {
+    final result = await CategoryStorage.load();
+
+    if (!mounted) return;
+
+    setState(() {
+      categories = result;
+    });
+  }
+
+  // Encontra o nome da categoria da tarefa
+  String getCategoryName() {
+    final category = categories.where(
+      (category) => category.id == task.categoryId,
+    );
+
+    if (category.isEmpty) {
+      return "Sem Categoria";
+    }
+
+    return category.first.name;
   }
 
   // Muda para a tela de edição
-  Future edit() async {
+  Future<void> edit() async {
     final result = await Navigator.of(context)
-        .pushNamed("/edit", arguments: task);
+        .pushNamed("/editTarefa", arguments: task);
 
     if (result is Task) {
       setState(() {
@@ -59,9 +95,8 @@ class _ViewPageState extends State<ViewPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-
           children: [
-            // Titulo
+            // Título
             const Center(
               child: Text(
                 "Detalhes da task",
@@ -71,7 +106,7 @@ class _ViewPageState extends State<ViewPage> {
 
             const SizedBox(height: 28),
 
-            // Titulo da tarefa
+            // Título da tarefa
             const Text(
               "Tarefa",
               style: TextStyle(
@@ -82,7 +117,6 @@ class _ViewPageState extends State<ViewPage> {
 
             const SizedBox(height: 6),
 
-            // Titulo em si
             Text(
               task.title,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -90,7 +124,7 @@ class _ViewPageState extends State<ViewPage> {
 
             const SizedBox(height: 24),
 
-            // Descrição da tarefa
+            // Descrição
             const Text(
               "Descrição",
               style: TextStyle(
@@ -101,7 +135,6 @@ class _ViewPageState extends State<ViewPage> {
 
             const SizedBox(height: 6),
 
-            // Descrição em si
             Text(
               task.description.isEmpty
                   ? "Nenhuma descrição informada."
@@ -111,7 +144,22 @@ class _ViewPageState extends State<ViewPage> {
 
             const SizedBox(height: 24),
 
-            // Status da tarefa
+            // Categoria
+            const Text(
+              "Categoria",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.purple,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            Text(getCategoryName(), style: const TextStyle(fontSize: 16)),
+
+            const SizedBox(height: 24),
+
+            // Status
             const Text(
               "Status",
               style: TextStyle(
@@ -122,7 +170,6 @@ class _ViewPageState extends State<ViewPage> {
 
             const SizedBox(height: 6),
 
-            // Status em si
             Row(
               children: [
                 Icon(
@@ -139,7 +186,7 @@ class _ViewPageState extends State<ViewPage> {
 
             const SizedBox(height: 30),
 
-            // Botão de Editar
+            // Botão de editar
             PrimaryButton(
               text: "Editar task",
               icon: Icons.edit,
